@@ -9,6 +9,7 @@
 import { Storage } from '../../core/storage.js';
 import { Analytics } from '../../core/analytics.js';
 import { Ads } from '../../core/ads.js';
+import { SoundManager } from '../../core/sound.js';
 import GameEffects from './effects.js';
 
 const FaceCrushGame = {
@@ -477,6 +478,13 @@ const FaceCrushGame = {
   showMatchEffect(matchData) {
     GameEffects.showMatchEffect(matchData.image, this.selectedTheme);
     
+    // 播放消除音效
+    if (matchData.isMainCharacter) {
+      SoundManager.mainCharacterMatch();  // 主角消除音效
+    } else {
+      SoundManager.match();  // 一般消除音效
+    }
+    
     // 震動回饋
     if (navigator.vibrate) {
       navigator.vibrate(50);
@@ -497,6 +505,9 @@ const FaceCrushGame = {
    */
   levelComplete() {
     this.pause();
+    
+    // 播放過關音效
+    SoundManager.levelComplete();
     
     const playTime = Date.now() - this.gameStartTime;
     
@@ -567,6 +578,7 @@ const FaceCrushGame = {
    */
   handleDragStart(index) {
     this.draggedId = index;
+    SoundManager.click();  // 播放點擊音效
   },
 
   /**
@@ -597,6 +609,7 @@ const FaceCrushGame = {
     const validMove = validMoves.includes(this.replacedId);
 
     if (validMove) {
+      SoundManager.swap();  // 播放交換音效
       // 交換方塊
       const newBoard = [...this.board];
       const temp = newBoard[this.draggedId];
@@ -604,6 +617,8 @@ const FaceCrushGame = {
       newBoard[this.replacedId] = temp;
       this.board = newBoard;
       this.updateUI();
+    } else {
+      SoundManager.invalid();  // 播放無效移動音效
     }
 
     this.draggedId = null;

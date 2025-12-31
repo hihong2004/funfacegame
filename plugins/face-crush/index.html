@@ -1024,7 +1024,12 @@
   <script type="module">
     import { Storage } from '../../core/storage.js';
     import { Analytics } from '../../core/analytics.js';
+    import { SoundManager } from '../../core/sound.js';
     import FaceCrushGame from './game.js';
+
+    // 初始化音效
+    SoundManager.init();
+    window.Sound = SoundManager;
 
     // 全域狀態
     let selectedTheme = null;
@@ -1032,7 +1037,7 @@
 
     // ========== 返回大廳 ==========
     window.goBack = function() {
-      window.location.href = '../../public/index.html';
+      window.location.href = '../../index.html';
     };
 
     // ========== 階段管理 ==========
@@ -1046,6 +1051,7 @@
     // ========== 主題選擇 ==========
     document.querySelectorAll('.theme-card').forEach(card => {
       card.addEventListener('click', function() {
+        SoundManager.click();  // 播放點擊音效
         document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
         this.classList.add('selected');
         selectedTheme = this.dataset.theme;
@@ -1059,6 +1065,7 @@
     });
 
     document.getElementById('btn-next-to-photo').addEventListener('click', () => {
+      SoundManager.button();  // 播放按鈕音效
       showPhase('photo');
       Analytics.track('theme_selected', {
         game_id: 'face-crush',

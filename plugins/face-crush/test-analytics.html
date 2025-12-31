@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Face Crush - Analytics & Ads Test</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .test-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    .event-log {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 16px;
+    }
+    .event-item {
+      padding: 8px;
+      margin-bottom: 4px;
+      border-left: 3px solid #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+    }
+    .event-item.ad {
+      border-left-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.1);
+    }
+    .event-item.share {
+      border-left-color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .stat-card {
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: 900;
+      color: #1e293b;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #64748b;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+    }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #1e293b;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1 class="text-3xl font-black mb-2 text-slate-900">📊 Analytics & Ads Integration Test</h1>
+    <p class="text-sm text-slate-600 mb-6">Test tracking events and ad integration for Face Crush</p>
+    
+    <!-- 控制按鈕 -->
+    <div class="mb-6">
+      <h2 class="text-lg font-bold mb-3">🎮 Game Events</h2>
+      <button onclick="simulateGameStart()" class="btn btn-primary">Start Game</button>
+      <button onclick="simulateGamePause()" class="btn btn-secondary">Pause Game</button>
+      <button onclick="simulateGameResume()" class="btn btn-secondary">Resume Game</button>
+      <button onclick="simulateLevelComplete()" class="btn btn-success">Complete Level</button>
+      <button onclick="simulateGameEnd()" class="btn btn-secondary">End Game</button>
+    </div>
+
+    <div class="mb-6">
+      <h2 class="text-lg font-bold mb-3">🎯 Match Events</h2>
+      <button onclick="simulateMatches(5)" class="btn btn-primary">Simulate 5 Matches</button>
+      <button onclick="simulateMatches(10)" class="btn btn-primary">Simulate 10 Matches</button>
+      <button onclick="simulateMatches(25)" class="btn btn-primary">Simulate 25 Matches</button>
+    </div>
+
+    <div class="mb-6">
+      <h2 class="text-lg font-bold mb-3">📢 Share Events</h2>
+      <button onclick="simulateShare('instagram')" class="btn btn-success">Share to Instagram</button>
+      <button onclick="simulateShare('tiktok')" class="btn btn-success">Share to TikTok</button>
+      <button onclick="simulateShare('copy_link')" class="btn btn-success">Copy Link</button>
+      <button onclick="simulateShare('download')" class="btn btn-success">Download</button>
+    </div>
+
+    <div class="mb-6">
+      <h2 class="text-lg font-bold mb-3">💰 Ad Events</h2>
+      <button onclick="simulateAd('preroll')" class="btn btn-warning">Show Preroll Ad</button>
+      <button onclick="simulateAd('interstitial')" class="btn btn-warning">Show Interstitial Ad</button>
+    </div>
+
+    <div class="mb-6">
+      <button onclick="clearLog()" class="btn btn-secondary">🗑️ Clear Log</button>
+      <button onclick="exportLog()" class="btn btn-secondary">📥 Export Log</button>
+    </div>
+
+    <!-- 統計 -->
+    <h2 class="text-lg font-bold mb-3">📈 Event Statistics</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-game-events">0</div>
+        <div class="stat-label">Game Events</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-match-events">0</div>
+        <div class="stat-label">Match Events</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-share-events">0</div>
+        <div class="stat-label">Share Events</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-ad-events">0</div>
+        <div class="stat-label">Ad Events</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total-events">0</div>
+        <div class="stat-label">Total Events</div>
+      </div>
+    </div>
+
+    <!-- 事件日誌 -->
+    <h2 class="text-lg font-bold mb-3 mt-6">📋 Event Log</h2>
+    <div class="event-log" id="event-log"></div>
+  </div>
+
+  <script type="module">
+    import { Analytics } from '../../core/analytics.js';
+    import { Ads } from '../../core/ads.js';
+
+    // 初始化模擬環境
+    window.Analytics = Analytics;
+    window.Ads = Ads;
+
+    // 事件計數器
+    let eventCounts = {
+      game: 0,
+      match: 0,
+      share: 0,
+      ad: 0,
+      total: 0
+    };
+
+    // 遊戲狀態
+    let gameState = {
+      level: 1,
+      score: 0,
+      matchCount: 0,
+      gameStartTime: Date.now()
+    };
+
+    // 日誌記錄
+    function logEvent(eventName, eventData, type = 'game') {
+      const timestamp = new Date().toLocaleTimeString();
+      const log = document.getElementById('event-log');
+      
+      const eventDiv = document.createElement('div');
+      eventDiv.className = `event-item ${type}`;
+      eventDiv.innerHTML = `
+        <strong>[${timestamp}]</strong> ${eventName}
+        <pre style="margin-top: 4px; opacity: 0.8;">${JSON.stringify(eventData, null, 2)}</pre>
+      `;
+      
+      log.insertBefore(eventDiv, log.firstChild);
+      
+      // 更新計數器
+      eventCounts[type]++;
+      eventCounts.total++;
+      updateStats();
+      
+      // 實際追蹤
+      Analytics.track(eventName, eventData);
+    }
+
+    // 更新統計
+    function updateStats() {
+      document.getElementById('stat-game-events').textContent = eventCounts.game;
+      document.getElementById('stat-match-events').textContent = eventCounts.match;
+      document.getElementById('stat-share-events').textContent = eventCounts.share;
+      document.getElementById('stat-ad-events').textContent = eventCounts.ad;
+      document.getElementById('stat-total-events').textContent = eventCounts.total;
+    }
+
+    // 模擬遊戲開始
+    window.simulateGameStart = function() {
+      gameState.gameStartTime = Date.now();
+      gameState.level = 1;
+      gameState.score = 0;
+      gameState.matchCount = 0;
+      
+      logEvent('game_start', {
+        game_id: 'face-crush',
+        theme: 'birthday',
+        level: gameState.level,
+        custom_images_count: 3,
+        target_score: 50
+      }, 'game');
+    };
+
+    // 模擬遊戲暫停
+    window.simulateGamePause = function() {
+      logEvent('game_pause', {
+        game_id: 'face-crush',
+        level: gameState.level,
+        score: gameState.score,
+        play_time: Date.now() - gameState.gameStartTime
+      }, 'game');
+    };
+
+    // 模擬遊戲繼續
+    window.simulateGameResume = function() {
+      logEvent('game_resume', {
+        game_id: 'face-crush',
+        level: gameState.level,
+        score: gameState.score
+      }, 'game');
+    };
+
+    // 模擬關卡完成
+    window.simulateLevelComplete = function() {
+      const playTime = Date.now() - gameState.gameStartTime;
+      
+      logEvent('level_complete', {
+        game_id: 'face-crush',
+        level: gameState.level,
+        score: gameState.score,
+        time: playTime,
+        theme: 'birthday'
+      }, 'game');
+      
+      gameState.level++;
+      gameState.score += 50;
+      gameState.matchCount = 0;
+    };
+
+    // 模擬遊戲結束
+    window.simulateGameEnd = function() {
+      const playTime = Date.now() - gameState.gameStartTime;
+      
+      logEvent('game_end', {
+        game_id: 'face-crush',
+        level: gameState.level,
+        score: gameState.score,
+        play_time: playTime,
+        reason: 'destroy'
+      }, 'game');
+    };
+
+    // 模擬匹配
+    window.simulateMatches = function(count) {
+      for (let i = 0; i < count; i++) {
+        gameState.matchCount++;
+        gameState.score += 3;
+        
+        // 每 10 次匹配追蹤一次
+        if (gameState.matchCount % 10 === 0) {
+          logEvent('match_milestone', {
+            game_id: 'face-crush',
+            level: gameState.level,
+            match_count: gameState.matchCount,
+            score: gameState.score
+          }, 'match');
+        }
+      }
+    };
+
+    // 模擬分享
+    window.simulateShare = function(platform) {
+      logEvent('share', {
+        game_id: 'face-crush',
+        platform: platform,
+        theme: 'birthday',
+        level: gameState.level,
+        score: gameState.score
+      }, 'share');
+    };
+
+    // 模擬廣告
+    window.simulateAd = function(adType) {
+      logEvent('ad_shown', {
+        game_id: 'face-crush',
+        ad_type: adType,
+        level: gameState.level
+      }, 'ad');
+    };
+
+    // 清除日誌
+    window.clearLog = function() {
+      document.getElementById('event-log').innerHTML = '';
+      eventCounts = {
+        game: 0,
+        match: 0,
+        share: 0,
+        ad: 0,
+        total: 0
+      };
+      updateStats();
+    };
+
+    // 匯出日誌
+    window.exportLog = function() {
+      const log = document.getElementById('event-log');
+      const text = log.innerText;
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `face-crush-analytics-${Date.now()}.txt`;
+      a.click();
+    };
+
+    // 初始化
+    console.log('[Test] Analytics & Ads test page loaded');
+  </script>
+</body>
+</html>

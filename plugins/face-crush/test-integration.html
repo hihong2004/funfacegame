@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Face Crush - Integration Test</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .test-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    .test-section {
+      margin-bottom: 32px;
+      padding: 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+    }
+    .test-section h2 {
+      font-size: 20px;
+      font-weight: 900;
+      margin-bottom: 16px;
+      color: #1e293b;
+    }
+    .test-item {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+    .test-pass {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .test-fail {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .test-info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    iframe {
+      width: 100%;
+      height: 800px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #1e293b;
+    }
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1 class="text-3xl font-black mb-6 text-slate-900">🎮 Face Crush - Integration Test</h1>
+    
+    <!-- 測試控制 -->
+    <div class="test-section">
+      <h2>🎯 Test Controls</h2>
+      <button onclick="testFileStructure()" class="btn btn-primary">✓ Test File Structure</button>
+      <button onclick="testModules()" class="btn btn-primary">✓ Test Modules</button>
+      <button onclick="testGameFlow()" class="btn btn-primary">✓ Test Game Flow</button>
+      <button onclick="clearStorage()" class="btn btn-secondary">🗑️ Clear Storage</button>
+      <button onclick="openLobby()" class="btn btn-secondary">🏠 Open Lobby</button>
+      <button onclick="openDirectGame()" class="btn btn-secondary">🎮 Open Game Direct</button>
+    </div>
+
+    <!-- 測試結果 -->
+    <div class="test-section">
+      <h2>📊 Test Results</h2>
+      <div id="test-results"></div>
+    </div>
+
+    <!-- 預覽 -->
+    <div class="test-section">
+      <h2>👁️ Live Preview</h2>
+      <p class="text-sm text-gray-600 mb-4">Test the complete flow: Theme Selection → Photo Upload → Game</p>
+      <iframe id="game-preview" src="./index.html"></iframe>
+    </div>
+  </div>
+
+  <script>
+    function log(message, type = 'info') {
+      const results = document.getElementById('test-results');
+      const className = type === 'pass' ? 'test-pass' : type === 'fail' ? 'test-fail' : 'test-info';
+      const icon = type === 'pass' ? '✓' : type === 'fail' ? '✗' : 'ℹ';
+      results.innerHTML += `<div class="test-item ${className}">${icon} ${message}</div>`;
+    }
+
+    function clearResults() {
+      document.getElementById('test-results').innerHTML = '';
+    }
+
+    async function testFileStructure() {
+      clearResults();
+      log('Testing file structure...', 'info');
+
+      const files = [
+        './config.json',
+        './game.js',
+        './effects.js',
+        './index.html',
+        './README.md',
+        './tests/test.js'
+      ];
+
+      let passed = 0;
+      let failed = 0;
+
+      for (const file of files) {
+        try {
+          const response = await fetch(file, { method: 'HEAD' });
+          if (response.ok) {
+            log(`File exists: ${file}`, 'pass');
+            passed++;
+          } else {
+            log(`File missing: ${file}`, 'fail');
+            failed++;
+          }
+        } catch (error) {
+          log(`Error checking ${file}: ${error.message}`, 'fail');
+          failed++;
+        }
+      }
+
+      log(`File structure test: ${passed} passed, ${failed} failed`, passed === files.length ? 'pass' : 'fail');
+    }
+
+    async function testModules() {
+      clearResults();
+      log('Testing module imports...', 'info');
+
+      try {
+        // Test core modules
+        log('Importing Storage module...', 'info');
+        const { Storage } = await import('../../core/storage.js');
+        log('Storage module loaded', 'pass');
+
+        log('Importing Analytics module...', 'info');
+        const { Analytics } = await import('../../core/analytics.js');
+        log('Analytics module loaded', 'pass');
+
+        // Test game modules
+        log('Importing Game module...', 'info');
+        const FaceCrushGame = (await import('./game.js')).default;
+        log('Game module loaded', 'pass');
+
+        log('Importing Effects module...', 'info');
+        const GameEffects = (await import('./effects.js')).default;
+        log('Effects module loaded', 'pass');
+
+        // Test config
+        log('Loading config...', 'info');
+        const response = await fetch('./config.json');
+        const config = await response.json();
+        log(`Config loaded: ${config.id} v${config.version}`, 'pass');
+
+        log('All modules loaded successfully!', 'pass');
+      } catch (error) {
+        log(`Module loading failed: ${error.message}`, 'fail');
+      }
+    }
+
+    async function testGameFlow() {
+      clearResults();
+      log('Testing game flow...', 'info');
+
+      try {
+        const { Storage } = await import('../../core/storage.js');
+
+        // Test 1: Theme selection
+        log('Test 1: Theme selection', 'info');
+        Storage.set('theme', 'birthday');
+        const theme = Storage.get('theme');
+        if (theme === 'birthday') {
+          log('Theme storage works', 'pass');
+        } else {
+          log('Theme storage failed', 'fail');
+        }
+
+        // Test 2: Photo storage
+        log('Test 2: Photo storage', 'info');
+        const testPhotos = [
+          { type: 'emoji', data: '😜' },
+          { type: 'emoji', data: '🤪' }
+        ];
+        Storage.set('photos', testPhotos);
+        const photos = Storage.get('photos');
+        if (photos && photos.length === 2) {
+          log('Photo storage works', 'pass');
+        } else {
+          log('Photo storage failed', 'fail');
+        }
+
+        // Test 3: Game initialization
+        log('Test 3: Game initialization', 'info');
+        const FaceCrushGame = (await import('./game.js')).default;
+        const testContainer = document.createElement('div');
+        const success = await FaceCrushGame.init(testContainer);
+        if (success && FaceCrushGame.isReady) {
+          log('Game initialization works', 'pass');
+          FaceCrushGame.destroy();
+        } else {
+          log('Game initialization failed', 'fail');
+        }
+
+        log('Game flow test completed!', 'pass');
+      } catch (error) {
+        log(`Game flow test failed: ${error.message}`, 'fail');
+      }
+    }
+
+    function clearStorage() {
+      try {
+        localStorage.removeItem('funfacegame_theme');
+        localStorage.removeItem('funfacegame_photos');
+        clearResults();
+        log('Storage cleared successfully', 'pass');
+        log('Reload the page to test fresh flow', 'info');
+      } catch (error) {
+        log(`Failed to clear storage: ${error.message}`, 'fail');
+      }
+    }
+
+    function openLobby() {
+      window.open('../../public/index.html', '_blank');
+    }
+
+    function openDirectGame() {
+      window.open('./index.html', '_blank');
+    }
+
+    // Auto-run basic tests on load
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        log('Auto-running basic tests...', 'info');
+        testFileStructure();
+      }, 500);
+    });
+  </script>
+</body>
+</html>

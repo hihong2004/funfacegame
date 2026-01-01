@@ -1,0 +1,331 @@
+/**
+ * Fun Face Game - 共用黏土風格 CSS
+ * @version 1.0.0
+ * @description 可重用於所有頁面的黏土風格樣式
+ */
+
+/* ========== 基礎樣式 ========== */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Fredoka One', 'Noto Sans TC', 'Noto Sans SC', 'Noto Sans JP', cursive, sans-serif;
+  background-color: #fffdf2;
+  overflow-x: hidden;
+  color: #4a4a4a;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* ========== 黏土卡片樣式 ========== */
+.clay-card {
+  border: 6px solid #4a4a4a;
+  border-radius: 40px;
+  box-shadow: 0 14px 0 #4a4a4a, inset 0 -10px 0 rgba(0,0,0,0.05);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background-color: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.clay-card:active {
+  transform: translateY(10px);
+  box-shadow: 0 4px 0 #4a4a4a, inset 0 -10px 0 rgba(0,0,0,0.05);
+}
+
+.clay-card-sm {
+  border: 4px solid #4a4a4a;
+  border-radius: 24px;
+  box-shadow: 0 8px 0 #4a4a4a;
+  background-color: #ffffff;
+}
+
+/* ========== 黏土按鈕樣式 ========== */
+.clay-button {
+  border: 4px solid #4a4a4a;
+  border-radius: 22px;
+  box-shadow: 0 6px 0 #4a4a4a;
+  transition: all 0.15s ease;
+  background: white;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.clay-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 #4a4a4a;
+}
+
+.clay-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #4a4a4a;
+}
+
+.clay-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.clay-button:disabled:hover,
+.clay-button:disabled:active {
+  transform: none;
+  box-shadow: 0 6px 0 #4a4a4a;
+}
+
+/* 按鈕顏色變體 */
+.clay-button-primary {
+  background: #3B82F6;
+  color: white;
+}
+
+.clay-button-success {
+  background: #22C55E;
+  color: white;
+}
+
+.clay-button-warning {
+  background: #F59E0B;
+  color: white;
+}
+
+.clay-button-danger {
+  background: #EF4444;
+  color: white;
+}
+
+.clay-button-yellow {
+  background: #FFD93D;
+  color: #4a4a4a;
+}
+
+/* ========== 動畫 ========== */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes wobble {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.1) rotate(2deg); }
+  50% { transform: scale(1) rotate(-2deg); }
+  75% { transform: scale(1.05) rotate(1deg); }
+  100% { transform: scale(1); }
+}
+
+@keyframes rotate-in {
+  0% { 
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.8);
+  }
+  100% { 
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 動畫類別 */
+.animate-float { 
+  animation: float 4s ease-in-out infinite; 
+}
+
+.hover-wobble:hover { 
+  animation: wobble 0.6s ease-in-out forwards; 
+}
+
+.animate-rotate-in {
+  animation: rotate-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s ease forwards;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease forwards;
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease forwards;
+}
+
+/* ========== 背景樣式 ========== */
+.bg-cream {
+  background-color: #fffdf2;
+}
+
+.bg-clay-yellow {
+  background-color: #FFD93D;
+}
+
+.bg-clay-blue {
+  background-color: #60A5FA;
+}
+
+.bg-clay-green {
+  background-color: #4ADE80;
+}
+
+.bg-clay-pink {
+  background-color: #F472B6;
+}
+
+.bg-clay-purple {
+  background-color: #A78BFA;
+}
+
+/* ========== 文字樣式 ========== */
+.text-clay {
+  color: #4a4a4a;
+}
+
+.text-shadow {
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+}
+
+/* ========== 輸入框樣式 ========== */
+.clay-input {
+  border: 4px solid #4a4a4a;
+  border-radius: 16px;
+  padding: 12px 16px;
+  font-family: inherit;
+  font-size: 16px;
+  background: white;
+  outline: none;
+  transition: box-shadow 0.2s;
+}
+
+.clay-input:focus {
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+}
+
+/* ========== 進度條樣式 ========== */
+.clay-progress {
+  width: 100%;
+  height: 24px;
+  border: 4px solid #4a4a4a;
+  border-radius: 12px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.clay-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #FFD93D, #F59E0B);
+  transition: width 0.3s ease;
+  border-radius: 8px;
+}
+
+/* ========== 徽章樣式 ========== */
+.clay-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 3px solid #4a4a4a;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  background: white;
+}
+
+.clay-badge-primary {
+  background: #3B82F6;
+  color: white;
+}
+
+.clay-badge-success {
+  background: #22C55E;
+  color: white;
+}
+
+.clay-badge-warning {
+  background: #F59E0B;
+  color: white;
+}
+
+/* ========== 工具類別 ========== */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tap-highlight-none {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ========== 響應式隱藏 ========== */
+.hide-mobile {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .hide-mobile {
+    display: block;
+  }
+  
+  .hide-desktop {
+    display: none;
+  }
+}

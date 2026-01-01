@@ -1,0 +1,34 @@
+{
+  "name": "Fun Face Game",
+  "short_name": "FunFace",
+  "description": "The most hilarious AI face game platform! Play Face Crush and more!",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fffdf2",
+  "theme_color": "#FFD93D",
+  "icons": [
+    {
+      "src": "./assets/images/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/images/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/images/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "lang": "en",
+  "prefer_related_applications": false
+}

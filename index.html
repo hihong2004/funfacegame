@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="description" content="Fun Face Game - The most hilarious AI face game platform!">
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#FFD93D">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="FunFace">
+  <link rel="apple-touch-icon" href="./assets/images/icons/icon-192.png">
+  
+  <title>Fun Face Game - Make Every Face Fun!</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+    html,body{width:100%;overflow-x:hidden}
+    body{font-family:'Fredoka One','Noto Sans TC',cursive,sans-serif;background:#fffdf2;color:#4a4a4a;min-height:100vh}
+    
+    /* Clay 風格卡片 */
+    .clay-card{
+      border:6px solid #4a4a4a;
+      border-radius:40px;
+      box-shadow:0 14px 0 #4a4a4a,inset 0 -10px 0 rgba(0,0,0,.05);
+      transition:all .3s cubic-bezier(.175,.885,.32,1.275);
+      background:#fff;
+      position:relative;
+      overflow:hidden
+    }
+    .clay-card:active{transform:translateY(10px);box-shadow:0 4px 0 #4a4a4a,inset 0 -10px 0 rgba(0,0,0,.05)}
+    
+    /* Clay 風格按鈕 */
+    .clay-button{
+      border:4px solid #4a4a4a;
+      border-radius:22px;
+      box-shadow:0 6px 0 #4a4a4a;
+      transition:all .15s ease;
+      background:#fff;
+      cursor:pointer;
+      font-family:inherit
+    }
+    .clay-button:hover{transform:translateY(-2px);box-shadow:0 8px 0 #4a4a4a}
+    .clay-button:active{transform:translateY(4px);box-shadow:0 2px 0 #4a4a4a}
+    
+    /* 動畫效果 */
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+    @keyframes wobble{
+      0%{transform:rotate(0deg) scale(1)}
+      15%{transform:rotate(-8deg) scale(1.05)}
+      30%{transform:rotate(6deg) scale(1.08)}
+      45%{transform:rotate(-6deg) scale(1.05)}
+      60%{transform:rotate(4deg) scale(1.03)}
+      75%{transform:rotate(-2deg) scale(1.01)}
+      100%{transform:rotate(0deg) scale(1)}
+    }
+    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    @keyframes rotate-in{0%{opacity:0;transform:rotate(-10deg) scale(.8)}100%{opacity:1;transform:rotate(0) scale(1)}}
+    
+    .animate-float{animation:float 4s ease-in-out infinite}
+    .animate-bounce{animation:bounce 1s ease-in-out infinite}
+    
+    /* 遊戲卡片 */
+    .game-card{
+      aspect-ratio:1;
+      padding:0;
+      text-decoration:none;
+      cursor:pointer;
+      transition:transform 0.3s ease, box-shadow 0.3s ease;
+      overflow:visible;
+    }
+    .game-card:hover{
+      animation:wobble 0.6s ease-in-out;
+      box-shadow:0 18px 0 #4a4a4a,inset 0 -10px 0 rgba(0,0,0,.05);
+    }
+    .game-card:active{
+      transform:translateY(10px) scale(0.98);
+      box-shadow:0 4px 0 #4a4a4a,inset 0 -10px 0 rgba(0,0,0,.05);
+    }
+    
+    /* 遊戲卡片圖片 - 填滿整個卡片 */
+    .game-card-inner{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      border-radius:34px;
+    }
+    .game-card img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transition:transform 0.3s ease;
+    }
+    .game-card:hover img{
+      transform:scale(1.08);
+    }
+    
+    /* 遊戲名稱標籤 */
+    .game-name{
+      position:absolute;
+      bottom:-12px;
+      left:50%;
+      transform:translateX(-50%);
+      background:#4a4a4a;
+      color:white;
+      padding:8px 20px;
+      border-radius:20px;
+      font-size:13px;
+      font-weight:700;
+      white-space:nowrap;
+      box-shadow:0 4px 8px rgba(0,0,0,0.2);
+      z-index:20;
+    }
+    @media(min-width:768px){.game-name{font-size:16px;padding:10px 24px;bottom:-14px}}
+    
+    /* 遊戲網格 */
+    .game-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2.5rem 1.5rem}
+    @media(min-width:768px){.game-grid{gap:3.5rem 2.5rem}}
+    @media(min-width:1024px){.game-grid{grid-template-columns:repeat(3,1fr)}}
+    
+    /* Logo */
+    .logo-container{width:120px;height:120px}
+    @media(min-width:768px){.logo-container{width:150px;height:150px}}
+    .logo-img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      filter:drop-shadow(0 8px 16px rgba(0,0,0,0.15));
+      transition:transform 0.3s ease;
+    }
+    .logo-img:hover{transform:scale(1.1) rotate(-5deg)}
+    
+    /* 語言切換 */
+    .lang-switcher{position:relative}
+    .lang-dropdown{display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:150px;z-index:100;padding:8px 0}
+    .lang-switcher.open .lang-dropdown{display:block;animation:rotate-in .3s ease forwards}
+    .lang-option{display:block;width:100%;text-align:left;padding:10px 16px;font-size:14px;font-weight:700;color:#4a4a4a;background:0 0;border:none;cursor:pointer;transition:background .2s}
+    .lang-option:hover{background:#FEF3C7}
+    .lang-option.active{color:#3B82F6;background:#EFF6FF}
+    
+    /* 廣告區 */
+    .ad-placeholder{width:100%;height:100px;background:0 0;border:4px dashed #e5e7eb;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#d1d5db;font-weight:700}
+    @media(min-width:768px){.ad-placeholder{height:150px}}
+    
+    /* Footer */
+    .footer-link{font-weight:700;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:4px;transition:color .2s;background:0 0;border:none;cursor:pointer;font-family:inherit;font-size:inherit;color:inherit}
+    .footer-link:hover{color:#3B82F6}
+    .footer-link.about{text-decoration-color:#BFDBFE}
+    .footer-link.privacy{text-decoration-color:#A7F3D0}
+    .footer-link.contact{text-decoration-color:#DDD6FE}
+    
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.4);backdrop-filter:blur(4px)}
+    .modal-overlay.show{display:flex}
+    .modal-content{width:100%;max-width:500px;max-height:85vh;overflow-y:auto;padding:24px;animation:rotate-in .3s ease forwards}
+    @media(min-width:768px){.modal-content{padding:32px}}
+    .modal-close{position:absolute;right:16px;top:16px;font-size:28px;font-weight:700;color:#9ca3af;background:0 0;border:none;cursor:pointer;transition:transform .2s,color .2s;line-height:1}
+    .modal-close:hover{transform:scale(1.2);color:#4a4a4a}
+    
+    /* 安裝按鈕 */
+    .install-btn{display:none;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;border-color:#15803d}
+    .install-btn.show{display:flex}
+    .install-btn:hover{background:linear-gradient(135deg,#16a34a,#15803d)}
+    
+    /* iOS 安裝提示 */
+    .ios-install-hint{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:white;border-radius:16px;padding:16px 20px;box-shadow:0 10px 40px rgba(0,0,0,0.2);z-index:1000;max-width:320px;text-align:center;animation:rotate-in .3s ease}
+    .ios-install-hint.show{display:block}
+    .ios-install-hint-close{position:absolute;top:8px;right:8px;background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af}
+    
+    /* Fallback */
+    .img-fallback{display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:64px;background:linear-gradient(135deg,#f3f4f6 0%,#e5e7eb 100%);border-radius:30px}
+  </style>
+</head>
+<body>
+  <div id="app" class="min-h-screen flex flex-col p-4 md:p-8 max-w-5xl mx-auto">
+    <header class="flex flex-col items-center gap-4 md:gap-6 relative pt-14 md:pt-0">
+      <!-- 安裝按鈕 -->
+      <div class="absolute left-0 top-0 z-50">
+        <button id="install-btn" class="install-btn clay-button px-3 py-2 md:px-4 md:py-3 items-center gap-2 min-h-[44px]" onclick="handleInstallClick()">
+          <span class="text-lg">📲</span>
+          <span id="install-text" class="text-xs md:text-base font-bold">Install</span>
+        </button>
+      </div>
+      
+      <!-- 語言切換 -->
+      <div class="absolute right-0 top-0 z-50">
+        <div id="lang-switcher" class="lang-switcher">
+          <button id="lang-btn" class="clay-button bg-white px-3 py-2 md:px-4 md:py-3 flex items-center gap-2 min-w-[100px] md:min-w-[140px] justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">🌐</span>
+              <span id="current-lang" class="text-xs md:text-base font-bold text-[#4a4a4a]">English</span>
+            </div>
+            <svg id="lang-chevron" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div id="lang-dropdown" class="lang-dropdown clay-card bg-white"></div>
+        </div>
+      </div>
+      
+      <!-- Logo -->
+      <div class="logo-container flex items-center justify-center mt-4 md:mt-0">
+        <img src="./assets/images/funfacegame-logo.png" alt="Fun Face Game" class="logo-img animate-float" onerror="this.outerHTML='<div class=\'logo-img animate-float\' style=\'font-size:80px\'>🦒</div>'">
+      </div>
+      
+      <!-- 標題 -->
+      <h1 id="app-title" class="text-3xl md:text-5xl lg:text-6xl text-[#4a4a4a] tracking-tight select-none text-center px-4 leading-tight font-black">Fun Face Game</h1>
+    </header>
+    
+    <main class="flex-grow py-8 md:py-12">
+      <div id="game-grid" class="game-grid"></div>
+      <div id="adsense-lobby-bottom" class="ad-placeholder mt-12"><span class="opacity-50">AD SPACE</span></div>
+    </main>
+    
+    <footer class="mt-8 border-t-4 border-gray-200 pt-8 pb-4 flex flex-col md:flex-row items-center justify-between gap-6 text-[#4a4a4a]">
+      <div id="copyright" class="text-sm font-bold opacity-60">© 2024 Fun Face Game Studio</div>
+      <nav class="flex flex-wrap justify-center gap-6">
+        <button id="btn-about" class="footer-link about">About</button>
+        <button id="btn-privacy" class="footer-link privacy">Privacy</button>
+        <button id="btn-contact" class="footer-link contact">Contact</button>
+      </nav>
+    </footer>
+  </div>
+  
+  <!-- Modal -->
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="modal-content clay-card bg-white relative" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="FunFaceGame.closeModal()">×</button>
+      <h2 id="modal-title" class="text-2xl md:text-3xl font-bold mb-6 text-[#4a4a4a] border-b-4 border-gray-100 pb-2"></h2>
+      <div id="modal-body" class="text-base md:text-lg leading-relaxed text-gray-700 whitespace-pre-wrap font-sans"></div>
+      <button onclick="FunFaceGame.closeModal()" class="clay-button bg-blue-500 text-white w-full mt-8 py-3 text-lg md:text-xl font-bold">OK!</button>
+    </div>
+  </div>
+  
+  <!-- iOS 安裝提示 -->
+  <div id="ios-install-hint" class="ios-install-hint">
+    <button class="ios-install-hint-close" onclick="hideIOSHint()">×</button>
+    <p id="ios-hint-title" style="margin:0 0 8px 0;font-size:14px"><strong>📲 Install Fun Face Game</strong></p>
+    <div id="ios-hint-steps" style="font-size:12px;color:#64748b;line-height:1.8">
+      1. Tap <span style="display:inline-block">⬆️</span> Share button<br>
+      2. Select "Add to Home Screen"<br>
+      3. Tap "Add"
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      'use strict';
+      
+      // ========== PWA 安裝管理 ==========
+      var PWAInstall = {
+        deferredPrompt: null,
+        isInstalled: false,
+        isIOS: false,
+        isAndroid: false,
+        isStandalone: false,
+        
+        init: function() {
+          this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+          this.isAndroid = /Android/.test(navigator.userAgent);
+          this.isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+          
+          if (this.isStandalone) { this.isInstalled = true; return; }
+          
+          var dismissed = localStorage.getItem('pwa_install_dismissed');
+          if (dismissed && Date.now() - parseInt(dismissed) < 24 * 60 * 60 * 1000) return;
+          
+          window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            PWAInstall.deferredPrompt = e;
+            PWAInstall.showInstallButton();
+          });
+          
+          window.addEventListener('appinstalled', function() {
+            PWAInstall.hideInstallButton();
+            PWAInstall.deferredPrompt = null;
+            PWAInstall.isInstalled = true;
+          });
+          
+          if (this.isIOS && !this.isStandalone) {
+            setTimeout(function() { PWAInstall.showInstallButton(); }, 2000);
+          }
+          if (this.isAndroid && !this.isStandalone) {
+            setTimeout(function() { if (!PWAInstall.deferredPrompt) PWAInstall.showInstallButton(); }, 3000);
+          }
+        },
+        
+        showInstallButton: function() {
+          var btn = document.getElementById('install-btn');
+          if (btn && !this.isInstalled) {
+            btn.classList.add('show');
+            var text = document.getElementById('install-text');
+            if (text) text.textContent = I18n.t('app.install');
+          }
+        },
+        
+        hideInstallButton: function() {
+          var btn = document.getElementById('install-btn');
+          if (btn) btn.classList.remove('show');
+        },
+        
+        handleClick: function() {
+          if (this.isIOS) {
+            // 顯示 iOS 安裝提示並更新語言
+            var hint = document.getElementById('ios-install-hint');
+            var title = document.getElementById('ios-hint-title');
+            var steps = document.getElementById('ios-hint-steps');
+            if (hint) {
+              if (title) title.innerHTML = '<strong>' + I18n.t('install.title') + '</strong>';
+              if (steps) steps.innerHTML = I18n.t('install.step1') + '<br>' + I18n.t('install.step2') + '<br>' + I18n.t('install.step3');
+              hint.classList.add('show');
+            }
+          } else if (this.deferredPrompt) {
+            this.deferredPrompt.prompt();
+            this.deferredPrompt.userChoice.then(function(result) {
+              if (result.outcome === 'dismissed') localStorage.setItem('pwa_install_dismissed', Date.now().toString());
+              PWAInstall.deferredPrompt = null;
+            });
+          } else {
+            var msg = this.isAndroid ? '📲 ' + I18n.t('install.android') : '📲 ' + I18n.t('install.desktop');
+            FunFaceGame.showModal(I18n.t('app.install'), msg);
+          }
+        }
+      };
+      
+      window.hideIOSHint = function() {
+        var hint = document.getElementById('ios-install-hint');
+        if (hint) hint.classList.remove('show');
+        localStorage.setItem('pwa_install_dismissed', Date.now().toString());
+      };
+      
+      window.handleInstallClick = function() { PWAInstall.handleClick(); };
+      
+      // ========== I18n ==========
+      var I18n = (function(){
+        var currentLanguage = 'en';
+        var translations = {
+          'en': { _langName:'English', 'app.title':'Fun Face Game', 'app.install':'Install', 'game.faceCrush':'Face Crush', 'game.faceSlicer':'Face Slicer', 'game.whacAFace':'Whac-A-Face', 'game.facePop':'Face Pop', 'game.faceStack':'Face Stack', 'game.faceMemory':'Face Memory', 'footer.aboutUs':'About', 'footer.privacy':'Privacy', 'footer.contact':'Contact', 'footer.copyright':'© 2024 Fun Face Game Studio', 'about.title':'About Us', 'about.content':'We create hilarious AI face games for families and friends!', 'privacy.title':'Privacy Policy', 'privacy.content':'Your privacy matters. All photos are processed in your browser and **never uploaded**.', 'contact.title':'Contact', 'contact.content':'Questions? Email us!', 'contact.email':'support@funfacegame.com', 'install.title':'📲 Install Fun Face Game', 'install.step1':'1. Tap ⬆️ Share button', 'install.step2':'2. Select "Add to Home Screen"', 'install.step3':'3. Tap "Add"', 'install.android':'1. Tap ⋮ menu\n2. Select "Add to Home screen"\n3. Tap "Add"', 'install.desktop':'• Chrome: ⋮ → "Install app"\n• Safari: Share → "Add to Home Screen"' },
+          'zh-TW': { _langName:'繁體中文', 'app.title':'趣味臉部遊戲', 'app.install':'安裝', 'game.faceCrush':'臉部粉碎', 'game.faceSlicer':'臉部切切樂', 'game.whacAFace':'打臉鼠', 'game.facePop':'臉部氣球', 'game.faceStack':'臉部疊疊樂', 'game.faceMemory':'臉部記憶', 'footer.aboutUs':'關於', 'footer.privacy':'隱私', 'footer.contact':'聯絡', 'footer.copyright':'© 2024 趣味臉部遊戲', 'about.title':'關於我們', 'about.content':'我們為家人朋友創造歡樂的 AI 臉部遊戲！', 'privacy.title':'隱私權政策', 'privacy.content':'您的隱私很重要。所有照片都在瀏覽器中處理，**絕不上傳**。', 'contact.title':'聯絡我們', 'contact.content':'有問題嗎？寄信給我們！', 'contact.email':'support@funfacegame.com', 'install.title':'📲 安裝趣味臉部遊戲', 'install.step1':'1. 點擊 ⬆️ 分享按鈕', 'install.step2':'2. 選擇「加入主畫面」', 'install.step3':'3. 點擊「新增」', 'install.android':'1. 點擊 ⋮ 選單\n2. 選擇「加入主畫面」\n3. 點擊「新增」', 'install.desktop':'• Chrome：⋮ →「安裝應用程式」\n• Safari：分享 →「加入主畫面」' },
+          'zh-CN': { _langName:'简体中文', 'app.title':'趣味脸部游戏', 'app.install':'安装', 'game.faceCrush':'脸部粉碎', 'game.faceSlicer':'脸部切切乐', 'game.whacAFace':'打脸鼠', 'game.facePop':'脸部气球', 'game.faceStack':'脸部叠叠乐', 'game.faceMemory':'脸部记忆', 'footer.aboutUs':'关于', 'footer.privacy':'隐私', 'footer.contact':'联系', 'footer.copyright':'© 2024 趣味脸部游戏', 'about.title':'关于我们', 'about.content':'我们为家人朋友创造欢乐的 AI 脸部游戏！', 'privacy.title':'隐私权政策', 'privacy.content':'您的隐私很重要。所有照片都在浏览器中处理，**绝不上传**。', 'contact.title':'联系我们', 'contact.content':'有问题吗？发邮件给我们！', 'contact.email':'support@funfacegame.com', 'install.title':'📲 安装趣味脸部游戏', 'install.step1':'1. 点击 ⬆️ 分享按钮', 'install.step2':'2. 选择「添加到主屏幕」', 'install.step3':'3. 点击「添加」', 'install.android':'1. 点击 ⋮ 菜单\n2. 选择「添加到主屏幕」\n3. 点击「添加」', 'install.desktop':'• Chrome：⋮ →「安装应用」\n• Safari：分享 →「添加到主屏幕」' },
+          'ja': { _langName:'日本語', 'app.title':'変顔ゲーム', 'app.install':'インストール', 'game.faceCrush':'フェイスクラッシュ', 'game.faceSlicer':'フェイススライサー', 'game.whacAFace':'もぐらたたき', 'game.facePop':'フェイスポップ', 'game.faceStack':'フェイススタック', 'game.faceMemory':'顔記憶', 'footer.aboutUs':'概要', 'footer.privacy':'プライバシー', 'footer.contact':'連絡', 'footer.copyright':'© 2024 変顔ゲーム', 'about.title':'概要', 'about.content':'楽しいAI顔ゲームを作っています！', 'privacy.title':'プライバシー', 'privacy.content':'プライバシーは大切です。写真はブラウザで処理されます。', 'contact.title':'連絡', 'contact.content':'質問がありますか？', 'contact.email':'support@funfacegame.com', 'install.title':'📲 変顔ゲームをインストール', 'install.step1':'1. ⬆️ 共有ボタンをタップ', 'install.step2':'2.「ホーム画面に追加」を選択', 'install.step3':'3.「追加」をタップ', 'install.android':'1. ⋮ メニューをタップ\n2.「ホーム画面に追加」を選択\n3.「追加」をタップ', 'install.desktop':'• Chrome：⋮ →「アプリをインストール」\n• Safari：共有 →「ホーム画面に追加」' },
+          'ko': { _langName:'한국어', 'app.title':'재미있는 얼굴 게임', 'app.install':'설치', 'game.faceCrush':'페이스 크러쉬', 'game.faceSlicer':'페이스 슬라이서', 'game.whacAFace':'두더지 잡기', 'game.facePop':'페이스 팝', 'game.faceStack':'페이스 스택', 'game.faceMemory':'페이스 메모리', 'footer.aboutUs':'소개', 'footer.privacy':'개인정보', 'footer.contact':'연락처', 'footer.copyright':'© 2024 재미있는 얼굴 게임', 'about.title':'소개', 'about.content':'재미있는 AI 얼굴 게임을 만듭니다!', 'privacy.title':'개인정보', 'privacy.content':'개인정보는 중요합니다.', 'contact.title':'연락처', 'contact.content':'질문이 있으신가요?', 'contact.email':'support@funfacegame.com', 'install.title':'📲 게임 설치하기', 'install.step1':'1. ⬆️ 공유 버튼 탭', 'install.step2':'2. "홈 화면에 추가" 선택', 'install.step3':'3. "추가" 탭', 'install.android':'1. ⋮ 메뉴 탭\n2. "홈 화면에 추가" 선택\n3. "추가" 탭', 'install.desktop':'• Chrome: ⋮ → "앱 설치"\n• Safari: 공유 → "홈 화면에 추가"' },
+          'de': { _langName:'Deutsch', 'app.title':'Lustiges Gesichtsspiel', 'app.install':'Installieren', 'game.faceCrush':'Gesichts-Crush', 'game.faceSlicer':'Gesichts-Schneider', 'game.whacAFace':'Gesichts-Hammer', 'game.facePop':'Gesichts-Ballon', 'game.faceStack':'Gesichts-Stapel', 'game.faceMemory':'Gesichts-Memory', 'footer.aboutUs':'Über uns', 'footer.privacy':'Datenschutz', 'footer.contact':'Kontakt', 'footer.copyright':'© 2024 Lustiges Gesichtsspiel', 'about.title':'Über uns', 'about.content':'Wir machen lustige AI Gesichtsspiele!', 'privacy.title':'Datenschutz', 'privacy.content':'Ihre Privatsphäre ist wichtig.', 'contact.title':'Kontakt', 'contact.content':'Fragen?', 'contact.email':'support@funfacegame.com', 'install.title':'📲 App installieren', 'install.step1':'1. ⬆️ Teilen-Button tippen', 'install.step2':'2. "Zum Home-Bildschirm" wählen', 'install.step3':'3. "Hinzufügen" tippen', 'install.android':'1. ⋮ Menü tippen\n2. "Zum Startbildschirm hinzufügen"\n3. "Hinzufügen" tippen', 'install.desktop':'• Chrome: ⋮ → "App installieren"\n• Safari: Teilen → "Zum Home-Bildschirm"' },
+          'es': { _langName:'Español', 'app.title':'Juego de Caras', 'app.install':'Instalar', 'game.faceCrush':'Cara Crush', 'game.faceSlicer':'Corta Caras', 'game.whacAFace':'Golpea Cara', 'game.facePop':'Cara Pop', 'game.faceStack':'Apila Caras', 'game.faceMemory':'Memoria Caras', 'footer.aboutUs':'Nosotros', 'footer.privacy':'Privacidad', 'footer.contact':'Contacto', 'footer.copyright':'© 2024 Juego de Caras', 'about.title':'Nosotros', 'about.content':'Creamos juegos de caras divertidos!', 'privacy.title':'Privacidad', 'privacy.content':'Su privacidad importa.', 'contact.title':'Contacto', 'contact.content':'¿Preguntas?', 'contact.email':'support@funfacegame.com', 'install.title':'📲 Instalar juego', 'install.step1':'1. Toca ⬆️ botón Compartir', 'install.step2':'2. Selecciona "Añadir a pantalla"', 'install.step3':'3. Toca "Añadir"', 'install.android':'1. Toca ⋮ menú\n2. "Añadir a pantalla de inicio"\n3. Toca "Añadir"', 'install.desktop':'• Chrome: ⋮ → "Instalar app"\n• Safari: Compartir → "Añadir a inicio"' },
+          'vi': { _langName:'Tiếng Việt', 'app.title':'Game Mặt Vui', 'app.install':'Cài đặt', 'game.faceCrush':'Đập Mặt', 'game.faceSlicer':'Cắt Mặt', 'game.whacAFace':'Đánh Mặt', 'game.facePop':'Nổ Mặt', 'game.faceStack':'Xếp Mặt', 'game.faceMemory':'Nhớ Mặt', 'footer.aboutUs':'Giới thiệu', 'footer.privacy':'Bảo mật', 'footer.contact':'Liên hệ', 'footer.copyright':'© 2024 Game Mặt Vui', 'about.title':'Giới thiệu', 'about.content':'Chúng tôi tạo game mặt vui!', 'privacy.title':'Bảo mật', 'privacy.content':'Quyền riêng tư quan trọng.', 'contact.title':'Liên hệ', 'contact.content':'Có câu hỏi?', 'contact.email':'support@funfacegame.com', 'install.title':'📲 Cài đặt game', 'install.step1':'1. Nhấn ⬆️ nút Chia sẻ', 'install.step2':'2. Chọn "Thêm vào màn hình chính"', 'install.step3':'3. Nhấn "Thêm"', 'install.android':'1. Nhấn ⋮ menu\n2. Chọn "Thêm vào màn hình chính"\n3. Nhấn "Thêm"', 'install.desktop':'• Chrome: ⋮ → "Cài đặt ứng dụng"\n• Safari: Chia sẻ → "Thêm vào màn hình"' }
+        };
+        function t(key){ var lang = translations[currentLanguage] || translations['en']; return lang[key] || translations['en'][key] || key; }
+        function setLanguage(code){ if(translations[code]){ currentLanguage = code; return true; } return false; }
+        function getCurrentLanguage(){ return currentLanguage; }
+        function getLanguageName(code){ var lang = translations[code]; return lang ? lang._langName : code; }
+        function getSupportedLanguages(){ return Object.keys(translations).map(function(code){ return { code: code, name: translations[code]._langName }; }); }
+        function isSupported(code){ return !!translations[code]; }
+        return { t:t, setLanguage:setLanguage, getCurrentLanguage:getCurrentLanguage, getLanguageName:getLanguageName, getSupportedLanguages:getSupportedLanguages, isSupported:isSupported };
+      })();
+      window.I18n = I18n;
+      
+      // 遊戲設定 - 全部啟用
+      var GAMES = [
+        { id:'face-crush', nameKey:'game.faceCrush', image:'./assets/images/buttons/button-face-crush.png', fallbackEmoji:'💥', path:'./plugins/face-crush/index.html' },
+        { id:'face-slicer', nameKey:'game.faceSlicer', image:'./assets/images/buttons/button-face-slicer.png', fallbackEmoji:'🔪', path:'./plugins/face-slicer/index.html' },
+        { id:'whac-a-face', nameKey:'game.whacAFace', image:'./assets/images/buttons/button-whac-a-face.png', fallbackEmoji:'🔨', path:'./plugins/whac-a-face/index.html' },
+        { id:'face-pop', nameKey:'game.facePop', image:'./assets/images/buttons/button-face-pop.png', fallbackEmoji:'🎈', path:'./plugins/face-pop/index.html' },
+        { id:'face-stack', nameKey:'game.faceStack', image:'./assets/images/buttons/button-face-stack.png', fallbackEmoji:'📚', path:'./plugins/face-stack/index.html' },
+        { id:'face-memory', nameKey:'game.faceMemory', image:'./assets/images/buttons/button-face-memory.png', fallbackEmoji:'🧠', path:'./plugins/face-memory/index.html' }
+      ];
+      
+      var currentLang = 'en';
+      var DOM = {};
+      
+      function init(){
+        cacheDOM();
+        detectLanguage();
+        renderLanguageOptions();
+        renderGameGrid();
+        updateTexts();
+        bindEvents();
+        PWAInstall.init();
+      }
+      
+      function cacheDOM(){
+        DOM.appTitle = document.getElementById('app-title');
+        DOM.langSwitcher = document.getElementById('lang-switcher');
+        DOM.langBtn = document.getElementById('lang-btn');
+        DOM.langDropdown = document.getElementById('lang-dropdown');
+        DOM.langChevron = document.getElementById('lang-chevron');
+        DOM.currentLang = document.getElementById('current-lang');
+        DOM.gameGrid = document.getElementById('game-grid');
+        DOM.installBtn = document.getElementById('install-btn');
+        DOM.installText = document.getElementById('install-text');
+        DOM.btnAbout = document.getElementById('btn-about');
+        DOM.btnPrivacy = document.getElementById('btn-privacy');
+        DOM.btnContact = document.getElementById('btn-contact');
+        DOM.copyright = document.getElementById('copyright');
+        DOM.modalOverlay = document.getElementById('modal-overlay');
+        DOM.modalTitle = document.getElementById('modal-title');
+        DOM.modalBody = document.getElementById('modal-body');
+      }
+      
+      function detectLanguage(){
+        try {
+          var saved = localStorage.getItem('fun_face_game_language');
+          if(saved && I18n.isSupported(saved)){ currentLang = saved; I18n.setLanguage(currentLang); return; }
+        } catch(e){}
+        var browserLang = navigator.language || 'en';
+        if(browserLang.indexOf('zh-TW') >= 0 || browserLang.indexOf('zh-HK') >= 0) currentLang = 'zh-TW';
+        else if(browserLang.indexOf('zh') >= 0) currentLang = 'zh-CN';
+        else if(browserLang.indexOf('ja') === 0) currentLang = 'ja';
+        else if(browserLang.indexOf('ko') === 0) currentLang = 'ko';
+        else if(browserLang.indexOf('de') === 0) currentLang = 'de';
+        else if(browserLang.indexOf('es') === 0) currentLang = 'es';
+        else if(browserLang.indexOf('vi') === 0) currentLang = 'vi';
+        else currentLang = 'en';
+        I18n.setLanguage(currentLang);
+      }
+      
+      function renderLanguageOptions(){
+        if(!DOM.langDropdown) return;
+        var langs = I18n.getSupportedLanguages();
+        DOM.langDropdown.innerHTML = langs.map(function(l){
+          var isActive = l.code === currentLang ? ' active' : '';
+          return '<button class="lang-option' + isActive + '" onclick="FunFaceGame.setLanguage(\'' + l.code + '\')">' + l.name + '</button>';
+        }).join('');
+        if(DOM.currentLang) DOM.currentLang.textContent = I18n.getLanguageName(currentLang);
+      }
+      
+      function renderGameGrid(){
+        if(!DOM.gameGrid) return;
+        DOM.gameGrid.innerHTML = GAMES.map(function(game){
+          return '<div class="clay-card game-card" onclick="window.location.href=\'' + game.path + '\'" data-game="' + game.id + '">' +
+            '<div class="game-card-inner">' +
+              '<img src="' + game.image + '" alt="' + I18n.t(game.nameKey) + '" onerror="this.outerHTML=\'<div class=img-fallback>' + game.fallbackEmoji + '</div>\'">' +
+            '</div>' +
+            '<div class="game-name" data-i18n="' + game.nameKey + '">' + I18n.t(game.nameKey) + '</div>' +
+          '</div>';
+        }).join('');
+      }
+      
+      function updateTexts(){
+        if(DOM.appTitle) DOM.appTitle.textContent = I18n.t('app.title');
+        if(DOM.installText) DOM.installText.textContent = I18n.t('app.install');
+        if(DOM.btnAbout) DOM.btnAbout.textContent = I18n.t('footer.aboutUs');
+        if(DOM.btnPrivacy) DOM.btnPrivacy.textContent = I18n.t('footer.privacy');
+        if(DOM.btnContact) DOM.btnContact.textContent = I18n.t('footer.contact');
+        if(DOM.copyright) DOM.copyright.textContent = I18n.t('footer.copyright');
+        document.querySelectorAll('[data-i18n]').forEach(function(el){
+          el.textContent = I18n.t(el.dataset.i18n);
+        });
+      }
+      
+      function bindEvents(){
+        if(DOM.langBtn){
+          DOM.langBtn.addEventListener('click', function(e){
+            e.stopPropagation();
+            DOM.langSwitcher.classList.toggle('open');
+            DOM.langChevron.style.transform = DOM.langSwitcher.classList.contains('open') ? 'rotate(180deg)' : '';
+          });
+        }
+        document.addEventListener('click', function(){ if(DOM.langSwitcher) DOM.langSwitcher.classList.remove('open'); if(DOM.langChevron) DOM.langChevron.style.transform = ''; });
+        if(DOM.btnAbout) DOM.btnAbout.addEventListener('click', function(){ showModal(I18n.t('about.title'), I18n.t('about.content')); });
+        if(DOM.btnPrivacy) DOM.btnPrivacy.addEventListener('click', function(){ showModal(I18n.t('privacy.title'), I18n.t('privacy.content')); });
+        if(DOM.btnContact) DOM.btnContact.addEventListener('click', function(){ showModal(I18n.t('contact.title'), I18n.t('contact.content') + '\n\n📧 ' + I18n.t('contact.email')); });
+        if(DOM.modalOverlay) DOM.modalOverlay.addEventListener('click', closeModal);
+      }
+      
+      function showModal(title, content){
+        if(DOM.modalTitle) DOM.modalTitle.textContent = title;
+        if(DOM.modalBody) DOM.modalBody.innerHTML = content.replace(/\*\*(.*?)\*\*/g, '<strong class="text-blue-600">$1</strong>');
+        if(DOM.modalOverlay) DOM.modalOverlay.classList.add('show');
+      }
+      
+      function closeModal(){
+        if(DOM.modalOverlay) DOM.modalOverlay.classList.remove('show');
+      }
+      
+      window.FunFaceGame = {
+        showModal: showModal,
+        closeModal: closeModal,
+        setLanguage: function(lang){
+          if(I18n.isSupported(lang)){
+            currentLang = lang;
+            I18n.setLanguage(lang);
+            try { localStorage.setItem('fun_face_game_language', lang); } catch(e){}
+            renderLanguageOptions();
+            renderGameGrid();
+            updateTexts();
+          }
+        }
+      };
+      
+      if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+      else init();
+    })();
+  </script>
+  
+  <script>
+    if('serviceWorker' in navigator){
+      window.addEventListener('load', function(){
+        navigator.serviceWorker.register('./sw.js').catch(function(){});
+      });
+    }
+  </script>
+</body>
+</html>

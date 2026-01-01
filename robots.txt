@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://funfacegame.com/sitemap.xml

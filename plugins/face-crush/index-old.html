@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Face Crush - Match 3 faces game with custom photos and themes">
+  <title>Face Crush - Fun Face Game</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 遊戲專屬樣式 -->
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .face-crush-game {
+      width: 100%;
+      max-width: 500px;
+      padding: 20px;
+      position: relative;
+    }
+
+    .game-area {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .game-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 16px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border-radius: 16px;
+    }
+
+    .game-stats > div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .game-stats .label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+      letter-spacing: 0.05em;
+    }
+
+    .game-stats .value {
+      font-size: 24px;
+      font-weight: 900;
+      color: #1e293b;
+      font-family: 'Courier New', monospace;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      border: 2px solid #cbd5e1;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #3b82f6);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    }
+
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 4px;
+      background: #334155;
+      padding: 8px;
+      border-radius: 16px;
+      box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .cell {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      transition: transform 0.1s ease;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .cell:active {
+      cursor: grabbing;
+    }
+
+    .cell:hover {
+      transform: scale(1.05);
+    }
+
+    .cell.target-cell {
+      border: 2px solid #ef4444;
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+    }
+
+    .cell.empty {
+      background: transparent !important;
+      border: none;
+    }
+
+    .cell-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 6px;
+      pointer-events: none;
+    }
+
+    .cell-color {
+      width: 100%;
+      height: 100%;
+      border-radius: 6px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+    }
+
+    .effects-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* ========== 匹配特效 ========== */
+    .match-effect-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+      pointer-events: all;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .match-effect-content {
+      position: relative;
+      animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .face-circle {
+      width: 224px;
+      height: 224px;
+      border-radius: 50%;
+      border: 4px solid #fbbf24;
+      overflow: hidden;
+      box-shadow: 0 0 80px rgba(251, 191, 36, 1);
+      background: white;
+      position: relative;
+    }
+
+    .matched-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: contrast(1.25);
+    }
+
+    .pulse-ring {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+      animation: pulse 0.8s ease;
+    }
+
+    .lightning-strike {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 384px;
+      height: 384px;
+      pointer-events: none;
+      animation: strike 0.4s ease-out;
+      color: #fbbf24;
+      filter: drop-shadow(0 0 15px rgba(255, 255, 0, 0.8));
+    }
+
+    /* ========== 勝利彈窗 ========== */
+    .win-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1002;
+      pointer-events: all;
+      animation: fadeIn 0.3s ease;
+      padding: 20px;
+    }
+
+    .win-modal {
+      background: white;
+      border-radius: 24px;
+      padding: 32px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .win-title {
+      font-size: 36px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-transform: uppercase;
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+
+    .win-subtitle {
+      color: #94a3b8;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .win-image-container {
+      width: 160px;
+      height: 160px;
+      margin: 0 auto 32px;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .win-image-container:hover {
+      transform: scale(1.05);
+    }
+
+    .win-target-image {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 4px solid #6366f1;
+      object-fit: cover;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+    }
+
+    .win-placeholder {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 4px solid #6366f1;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+    }
+
+    .win-effect-icon {
+      position: absolute;
+      bottom: -8px;
+      right: -8px;
+      font-size: 56px;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+      animation: splat 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform: rotate(12deg);
+    }
+
+    .share-badge {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: #3b82f6;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .win-message {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 32px;
+    }
+
+    .win-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn-share,
+    .btn-next-level {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-share {
+      background: #3b82f6;
+      color: white;
+      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-share:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-next-level {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    .btn-next-level:hover {
+      background: #e2e8f0;
+    }
+
+    /* ========== 分享彈窗 ========== */
+    .share-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1003;
+      pointer-events: all;
+      animation: fadeIn 0.3s ease;
+      padding: 20px;
+    }
+
+    .share-modal {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 24px;
+      padding: 24px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      position: relative;
+      color: white;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 4px;
+      transition: color 0.2s ease;
+    }
+
+    .close-btn:hover {
+      color: white;
+    }
+
+    .share-title {
+      font-size: 24px;
+      font-weight: 900;
+      text-align: center;
+      background: linear-gradient(135deg, #60a5fa 0%, #22d3ee 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 24px;
+    }
+
+    .share-preview {
+      background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+      border: 1px solid #475569;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .share-watermark {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0.7;
+      z-index: 10;
+    }
+
+    .watermark-logo {
+      background: #6366f1;
+      border-radius: 4px;
+      padding: 2px;
+      color: white;
+      font-size: 10px;
+    }
+
+    .watermark-text {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.1em;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .share-image-container {
+      width: 192px;
+      height: 192px;
+      margin: 16px auto;
+      position: relative;
+    }
+
+    .share-target-image {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 4px solid #6366f1;
+      object-fit: cover;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .share-placeholder {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 4px solid #6366f1;
+      background: #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+    }
+
+    .share-effect-icon {
+      position: absolute;
+      bottom: -8px;
+      right: -8px;
+      font-size: 48px;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+      transform: rotate(-12deg);
+    }
+
+    .share-info {
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .share-message {
+      font-size: 18px;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .share-stats {
+      font-size: 10px;
+      color: #60a5fa;
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+    }
+
+    .share-platforms {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .platform-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid #475569;
+      border-radius: 12px;
+      background: transparent;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .platform-btn:hover {
+      background: #334155;
+      transform: translateY(-2px);
+    }
+
+    .platform-btn.instagram {
+      background: linear-gradient(135deg, #fbbf24 0%, #ec4899 50%, #a855f7 100%);
+      border: none;
+    }
+
+    .platform-btn.tiktok {
+      background: black;
+      border: 1px solid #334155;
+    }
+
+    .platform-btn.facebook {
+      background: #1877f2;
+      border: none;
+    }
+
+    .platform-btn span {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tiktok-logo {
+      font-weight: 900;
+      font-size: 14px;
+    }
+
+    .share-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 12px;
+      background: #334155;
+      border: 1px solid #475569;
+      border-radius: 12px;
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .action-btn:hover {
+      background: #475569;
+    }
+
+    /* ========== 動畫 ========== */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0.3); opacity: 0; }
+      50% { transform: scale(1.1); opacity: 1; }
+      70% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
+
+    @keyframes strike {
+      0% { 
+        stroke-dasharray: 0 100;
+        opacity: 0;
+        transform: scale(1.5);
+      }
+      10% { opacity: 1; }
+      50% { 
+        stroke-dasharray: 100 0;
+        transform: scale(1);
+        filter: brightness(2);
+      }
+      100% { 
+        opacity: 0;
+        transform: scale(0.9);
+      }
+    }
+
+    @keyframes splat {
+      0% { transform: scale(0) rotate(0deg); opacity: 0; }
+      50% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+      70% { transform: scale(0.9) rotate(12deg); }
+      100% { transform: scale(1) rotate(12deg); opacity: 1; }
+    }
+
+    /* ========== 響應式 ========== */
+    @media (max-width: 640px) {
+      .game-stats .value {
+        font-size: 20px;
+      }
+
+      .win-title {
+        font-size: 28px;
+      }
+
+      .share-title {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 遊戲容器 -->
+  <div id="game-container"></div>
+
+  <!-- 載入核心模組與遊戲 -->
+  <script type="module">
+    import { Storage } from '../../core/storage.js';
+    import { Analytics } from '../../core/analytics.js';
+    import FaceCrushGame from './game.js';
+
+    // 初始化並啟動遊戲
+    async function initGame() {
+      console.log('[FaceCrush] Initializing...');
+
+      const container = document.getElementById('game-container');
+      
+      // 初始化遊戲
+      const success = await FaceCrushGame.init(container, {
+        config: null,
+        i18n: null
+      });
+
+      if (success) {
+        console.log('[FaceCrush] Ready to start!');
+        
+        // 自動開始遊戲
+        FaceCrushGame.start();
+      } else {
+        console.error('[FaceCrush] Failed to initialize!');
+      }
+    }
+
+    // 頁面載入完成後初始化
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initGame);
+    } else {
+      initGame();
+    }
+
+    // 監聽頁面卸載，清理遊戲
+    window.addEventListener('beforeunload', () => {
+      if (FaceCrushGame.isReady) {
+        FaceCrushGame.destroy();
+      }
+    });
+  </script>
+</body>
+</html>

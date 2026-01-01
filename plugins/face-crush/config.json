@@ -1,0 +1,145 @@
+{
+  "id": "face-crush",
+  "name": {
+    "en": "Face Crush",
+    "zh-TW": "臉部粉碎",
+    "zh-CN": "脸部粉碎",
+    "ja": "顔クラッシュ",
+    "de": "Gesichts-Crush",
+    "es": "Cara Aplastada",
+    "id": "Wajah Hancur",
+    "vi": "Nghiền Mặt"
+  },
+  "description": {
+    "en": "Match 3 faces to crush them! Customize with photos and themes for epic finishes.",
+    "zh-TW": "消除三個相同的臉！自訂照片與主題，享受史詩級結局。",
+    "zh-CN": "消除三个相同的脸！自定义照片与主题，享受史诗级结局。",
+    "ja": "3つの同じ顔を消そう！写真とテーマをカスタマイズして、壮大なフィニッシュを楽しもう。",
+    "de": "Verbinde 3 Gesichter! Passe Fotos und Themen für epische Abschlüsse an.",
+    "es": "¡Combina 3 caras para aplastarlas! Personaliza con fotos y temas para finales épicos.",
+    "id": "Cocokkan 3 wajah untuk menghancurkannya! Sesuaikan dengan foto dan tema untuk akhir yang epik.",
+    "vi": "Ghép 3 khuôn mặt để nghiền nát! Tùy chỉnh với ảnh và chủ đề cho kết thúc hoành tráng."
+  },
+  "version": "1.0.0",
+  "enabled": true,
+  "premium": false,
+  "type": "match-3",
+  "icon": "🎮",
+  "button": {
+    "image": "button-face-crush.png",
+    "color": "#FF5733"
+  },
+  "settings": {
+    "boardSize": 8,
+    "maxPhotos": 6,
+    "slotColors": [
+      "#FF5733",
+      "#33FF57",
+      "#3357FF",
+      "#F333FF",
+      "#FF33A8",
+      "#FFC300"
+    ],
+    "defaultEmojis": ["😜", "🤪", "😂", "🥳", "😎", "🤓"],
+    "gameSpeed": 100,
+    "vibrationEnabled": true
+  },
+  "levels": [
+    { "level": 1, "targetScore": 50, "difficulty": "easy" },
+    { "level": 2, "targetScore": 80, "difficulty": "easy" },
+    { "level": 3, "targetScore": 110, "difficulty": "normal" },
+    { "level": 4, "targetScore": 140, "difficulty": "normal" },
+    { "level": 5, "targetScore": 170, "difficulty": "hard" },
+    { "level": 6, "targetScore": 200, "difficulty": "hard" },
+    { "level": 7, "targetScore": 230, "difficulty": "hard" },
+    { "level": 8, "targetScore": 260, "difficulty": "expert" },
+    { "level": 9, "targetScore": 290, "difficulty": "expert" },
+    { "level": 10, "targetScore": 320, "difficulty": "expert" }
+  ],
+  "themes": {
+    "birthday": {
+      "id": "birthday",
+      "effectIcon": "🎂",
+      "winMessage": {
+        "en": "Happy Birthday! 🎂",
+        "zh-TW": "生日快樂！🎂",
+        "zh-CN": "生日快乐！🎂",
+        "ja": "お誕生日おめでとう！🎂",
+        "de": "Alles Gute zum Geburtstag! 🎂",
+        "es": "¡Feliz Cumpleaños! 🎂",
+        "id": "Selamat Ulang Tahun! 🎂",
+        "vi": "Chúc Mừng Sinh Nhật! 🎂"
+      }
+    },
+    "romance": {
+      "id": "romance",
+      "effectIcon": "💖",
+      "winMessage": {
+        "en": "I love you! 💖",
+        "zh-TW": "我喜歡你！💖",
+        "zh-CN": "我喜欢你！💖",
+        "ja": "愛してる！💖",
+        "de": "Ich liebe dich! 💖",
+        "es": "¡Te amo! 💖",
+        "id": "Aku cinta kamu! 💖",
+        "vi": "Anh yêu em! 💖"
+      }
+    },
+    "party": {
+      "id": "party",
+      "effectIcon": "🎉",
+      "winMessage": {
+        "en": "Let's Party! 🎉",
+        "zh-TW": "來派對吧！🎉",
+        "zh-CN": "来派对吧！🎉",
+        "ja": "パーティーしよう！🎉",
+        "de": "Lass uns feiern! 🎉",
+        "es": "¡A festejar! 🎉",
+        "id": "Mari berpesta! 🎉",
+        "vi": "Cùng tiệc tùng! 🎉"
+      }
+    },
+    "pet": {
+      "id": "pet",
+      "effectIcon": "🐾",
+      "winMessage": {
+        "en": "You're pawsome! 🐾",
+        "zh-TW": "你超可愛！🐾",
+        "zh-CN": "你超可爱！🐾",
+        "ja": "君は最高だよ！🐾",
+        "de": "Du bist toll! 🐾",
+        "es": "¡Eres increíble! 🐾",
+        "id": "Kamu luar biasa! 🐾",
+        "vi": "Bạn thật tuyệt! 🐾"
+      }
+    },
+    "prank": {
+      "id": "prank",
+      "effectIcon": "⚡",
+      "winMessage": {
+        "en": "Gotcha! ⚡",
+        "zh-TW": "被整到了！⚡",
+        "zh-CN": "被整到了！⚡",
+        "ja": "やられた！⚡",
+        "de": "Erwischt! ⚡",
+        "es": "¡Te pillé! ⚡",
+        "id": "Kena! ⚡",
+        "vi": "Trúng rồi! ⚡"
+      }
+    }
+  },
+  "ads": {
+    "preroll": true,
+    "interstitial": true,
+    "interstitialFrequency": 3,
+    "reward": true,
+    "banner": false
+  },
+  "analytics": {
+    "trackLevelComplete": true,
+    "trackScore": true,
+    "trackPlayTime": true,
+    "trackMatches": true,
+    "trackThemeUsage": true
+  }
+}
